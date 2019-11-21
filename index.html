@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Python Server Test</title>
+    <script>
+
+        function toggle_fans() {
+            console.log("in toggle_fans()")
+            loadFile("/change_power", update, "power");
+        }
+        function toggle_manual(){
+            loadFile("/change_auto",getData,"manual");
+        }
+
+        function xhrSuccess() {
+            this.callback.apply(this, this.arguments);
+        }
+
+        function xhrError() {
+            console.error(this.statusText);
+        }
+
+        function loadFile(url, callback ) {
+            var xhr = new XMLHttpRequest();
+            xhr.callback = callback;
+            xhr.arguments = Array.prototype.slice.call(arguments, 2);
+            xhr.onload = xhrSuccess;
+            xhr.onerror = xhrError;
+            xhr.open("GET", url, true);
+            xhr.send(null);
+        }
+        
+        function getData(attribute) {
+            myObj = JSON.parse(this.responseText)
+            console.log("attribute: " + attribute)
+            
+            if (attribute == "all") {
+                document.getElementById("auto").textContent = myObj["manual"];
+                document.getElementById("power").textContent = myObj["power"];
+            }else if(attribute == "power"){
+                console.log(attribute + ": "+ myObj[attribute]);
+                document.getElementById("power").textContent = myObj[attribute];
+                if (myObj[attribute] == "on"){
+                    document.getElementById("fans_toggle").textContent = "Turn Fans Off";
+                }else if (myObj[attribute] == "off") {
+                    document.getElementById("fans_toggle").textContent = "Turn Fans On";
+                }
+            }else if(attribute == 'auto'){
+                console.log(attribute + ": "+ myObj[attribute]);
+                document.getElementById("auto").textContent = myObj[attribute];
+                if (myObj[attribute] == "true"){
+                    document.getElementById("manual_toggle").textContent = "Turn Auto On";
+                }else if (myObj[attribute] == "false") {
+                    document.getElementById("manual_toggle").textContent = "Turn Auto Off";
+                }
+            }
+        }
+
+
+        function update(attribute){
+            loadFile("/data.json", getData, attribute);
+        }
+
+
+       
+    </script>
+
+<style>
+        table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+        }
+        </style>
+
+
+</head>
+
+<body onload="update('all')">
+    <h2>This is a test of a basic python web server.</h2>
+    <table style="width:25%">
+        <tr>
+            <th>Fan Status:</th>
+            <td id="power" style="text-align: center;"></td>
+        </tr>
+        <tr>
+            <th>Auto Status:</th>
+            <td id="auto" style="text-align: center;"></td>
+        </tr>
+        <tr>
+                
+            <th>Temperature: </th>
+            <th>Conversion: </th>
+        </tr>
+        <tr>
+            <td id="temp" style="text-align: center;"> 30 </td>
+            <td id="cel" style="text-align: center;"> 0 </td>
+        </tr>
+        <tr>
+
+            <td style="text-align: center;"><button id="fans_toggle" onclick="toggle_fans()" type="button">Turn On Fans</button></td>
+            <td style="text-align: center;"> <button id="manual_toggle" onclick="toggle_manual()" type="button">Turn On Manual</button></td>
+        </tr>
+    </table>
+</body>
+
+</html>
