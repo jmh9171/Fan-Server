@@ -1,10 +1,13 @@
+## TODO - All of my comments are preceded by a #/ - use them to identify mine from yours.
 # import these to be able to create the server and set it to a port
 import http.server
 import socketserver
 import json
 import time
+
 # the port number can be any port number above whatever the cutoff is
 PORT = 32323
+#/ Make this something more reasonable. (E.G. 8080).
 
 
 # Json stuff for interface between server and javascript code
@@ -15,6 +18,7 @@ PORT = 32323
 # inherited handler class where adjustments and if() will go
 class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
 
+    #/ This function makes no sens to me.
     # function to log any accesses to the server
     def accLog(self, msg):
         # opens the log file to append
@@ -33,6 +37,8 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
                 # load the json data
                 jsn = json.load(jf)
 
+                #/ Hard-coding on start-up is bad!
+
                 # write to the log file again with the json data formatted
                 log.write('\tFan Status:  auto: {}, Power: {}, Last turned on: {}\n'.format(
                     jsn['auto'], jsn['power'], jsn['Turned on Last']))
@@ -40,6 +46,7 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
                 jf.close
             log.close
 
+    /# See my example sendheader.
     # function will set the header info for each response
     def sendWHeader(self, response, content_type, data):
 
@@ -57,6 +64,11 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_PUT(self):
         # if '/change_power' is the GET request
+
+        #/ Make this a script. You can export the scripts to another python file, and import them at the top.
+        #/ See the additional file for a better example of how to handle put requests.
+        #/ This is a pretty terribly inneficient way of sending data back and forth, btw. Everything should be a json file that gets sent back and forth
+        #/ between server and browser.
         if self.path.lower() == '/change_power':
 
             print('change_power request called')
