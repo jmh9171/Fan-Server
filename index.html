@@ -7,13 +7,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Python Server Test</title>
     <script>
-
         function toggle_fans() {
-            console.log("in toggle_fans()")
-            loadFile("/change_power", update, "power");
+            loadFile("/change_power","PUT" ,update, "power");
         }
-        function toggle_manual(){
-            loadFile("/change_auto",getData,"manual");
+
+        function toggle_auto() {
+            loadFile("/change_auto","PUT" ,update, "auto");
+        }
+
+        function update(attribute) {
+            loadFile("/data.json","GET", getData, attribute);
         }
 
         function xhrSuccess() {
@@ -23,60 +26,63 @@
         function xhrError() {
             console.error(this.statusText);
         }
-
-        function loadFile(url, callback ) {
+        //url: the url to send to the server
+        //req: the type of request were sending
+        //callback: the name of the function were going to set as our callback if it succeeds.
+        function loadFile(url, req, callback) {
+            //object to hold the request 
             var xhr = new XMLHttpRequest();
+            //data member to hold the callback function
             xhr.callback = callback;
-            xhr.arguments = Array.prototype.slice.call(arguments, 2);
+            //data member that holds the arguments that will go into the callback function
+            xhr.arguments = Array.prototype.slice.call(arguments, 3);
+            //callback function for success
             xhr.onload = xhrSuccess;
+            //callback function for errors
             xhr.onerror = xhrError;
-            xhr.open("GET", url, true);
+            //open the request asynch
+            xhr.open(req, url, true);
+            //send the request
             xhr.send(null);
         }
+
         
+
         function getData(attribute) {
             myObj = JSON.parse(this.responseText)
-            console.log("attribute: " + attribute)
-            
-            if (attribute == "all") {
-                document.getElementById("auto").textContent = myObj["manual"];
-                document.getElementById("power").textContent = myObj["power"];
-            }else if(attribute == "power"){
-                console.log(attribute + ": "+ myObj[attribute]);
-                document.getElementById("power").textContent = myObj[attribute];
-                if (myObj[attribute] == "on"){
-                    document.getElementById("fans_toggle").textContent = "Turn Fans Off";
-                }else if (myObj[attribute] == "off") {
-                    document.getElementById("fans_toggle").textContent = "Turn Fans On";
-                }
-            }else if(attribute == 'auto'){
-                console.log(attribute + ": "+ myObj[attribute]);
-                document.getElementById("auto").textContent = myObj[attribute];
-                if (myObj[attribute] == "true"){
-                    document.getElementById("manual_toggle").textContent = "Turn Auto On";
-                }else if (myObj[attribute] == "false") {
-                    document.getElementById("manual_toggle").textContent = "Turn Auto Off";
-                }
+            console.log("Update Attribute: " + attribute)
+            switch (attribute) {
+                case 'all':
+                    document.getElementById("auto").textContent = myObj["auto"];
+                    document.getElementById("power").textContent = myObj["power"];
+                    document.getElementById("date").textContent = myObj["modified"]
+                    break;
+                case 'power':
+                    console.log(attribute + ": " + myObj[attribute]);
+                    document.getElementById("power").textContent = myObj[attribute];
+                    break;
+                case 'auto':
+                    console.log(attribute + ": " + myObj[attribute]);
+                    document.getElementById("auto").textContent = myObj[attribute];
+                    break;
+                case 'modified':
+                    console.log(attribute + ": " + myObj[attribute]);
+                    document.getElementById("date").textContent = myObj[attribute];
+                default:
+                    break;
             }
         }
 
-
-        function update(attribute){
-            loadFile("/data.json", getData, attribute);
-        }
-
-
-       
+        
     </script>
-
-<style>
-        table, th, td {
-          border: 1px solid black;
-          border-collapse: collapse;
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
         }
-        </style>
-
-
+    </style>
 </head>
 
 <body onload="update('all')">
@@ -91,7 +97,11 @@
             <td id="auto" style="text-align: center;"></td>
         </tr>
         <tr>
-                
+            <th>Last Turned On: </th>
+            <td id="date" style="text-align: center;"></td>
+        </tr>
+        <tr>
+
             <th>Temperature: </th>
             <th>Conversion: </th>
         </tr>
@@ -99,10 +109,13 @@
             <td id="temp" style="text-align: center;"> 30 </td>
             <td id="cel" style="text-align: center;"> 0 </td>
         </tr>
+        
         <tr>
 
-            <td style="text-align: center;"><button id="fans_toggle" onclick="toggle_fans()" type="button">Turn On Fans</button></td>
-            <td style="text-align: center;"> <button id="manual_toggle" onclick="toggle_manual()" type="button">Turn On Manual</button></td>
+            <td style="text-align: center;"><button id="fans_toggle" onclick="toggle_fans()" type="button">Toggle
+                    Fans</button></td>
+            <td style="text-align: center;"> <button id="auto_toggle" onclick="toggle_auto()" type="button">Toggle
+                    Auto</button></td>
         </tr>
     </table>
 </body>
