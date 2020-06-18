@@ -1,14 +1,18 @@
-# import these to be able to create the server and set it to a port
 import http.server
 import socketserver
-import time
 import scripts
 import TempControl
 import threading
+import RPi.GPIO as gpio
 
-# the port number can be any port number above whatever the cutoff is
-PORT = 8001
+PORT = 8000
+
 threadLock = threading.Lock()
+
+gpio.setup(26, gpio.OUT)
+gpio.output(26, gpio.LOW)
+gpio.setup(19, gpio.OUT)
+
 
 # inherited handler class where adjustments and if() will go
 class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
@@ -33,12 +37,24 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
 
     #handles put requests
     def do_PUT(self):
-        info = scripts.getJsonData('data.json')
         request = self.path.lower()[1::]
-        if info[request] == 'on':
-            info[request] = 'off'
-        elif info[request] == 'off':
-            info[request] = 'on'
+        info = scripts.getJsonData('data.json')
+        if request == 'power':
+            if info[request] == 'on':
+                info[request] = 'off'
+                gpio.output(19, gpio.LOW)
+                print(info[request])
+            elif info[request] == 'off':
+                info[request] = 'on'
+                gpio.output(19, gpio.HIGH)
+                print(info[request])
+        else:
+            if info[request] == 'on':
+                info[request] = 'off'
+            elif info[request] == 'off':
+                info[request] = 'on'
+                
+                
         #overwrites the json file with the new json data
         scripts.handlePut('data',info)
         #reads the newly overwritten file to send it as a response
@@ -62,6 +78,6 @@ class MyTCPServer(socketserver.TCPServer):
         Tthread = TempControl.myThread(2,'tempControl')
         Tthread.start()
 
-with MyTCPServer(("", PORT), MyTCPHandler) as httpd:
-    print("serving at port", PORT)
-    httpd.serve_forever()
+httpd = MyTCPServer(("", PORT), MyTCPHandler)
+print("serving at port", PORT)
+httpd.serve_forever()

@@ -18,6 +18,10 @@
         function update(attribute) {
             loadFile("/data.json","GET", getData, attribute);
         }
+        
+        function restart(){
+            loadFile("/restart", "GET", getData, "all");
+        }
 
         function xhrSuccess() {
             this.callback.apply(this, this.arguments);
@@ -112,9 +116,8 @@
         <tr>
 
             <th>Temperature: </th>
-            <td id="temp" style="text-align: center;"> 30 </td>
-            <td style="text-align: center;"> <button id="temp" onclick="update('temp')" type="button">Toggle
-                Temperature</button></td>
+            <td id="temp" style="text-align: center;"></td>
+            <td></td>
         </tr>
     </table>
 </body>
