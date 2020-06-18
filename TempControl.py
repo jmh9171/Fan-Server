@@ -80,10 +80,7 @@ class myThread (threading.Thread):
             info['currentTemp'] = str(self.temp)
             self.auto = info['auto']
             scripts.handlePut('data',info)
-            if self.temp % 2 != 0:
-               gpio.output(19, gpio.LOW)
-            else:
-                gpio.output(19, gpio.HIGH)
+            #need to add on/off here for fans
                 
 
             
