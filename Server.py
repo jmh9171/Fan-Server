@@ -43,17 +43,18 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
             if info[request] == 'on':
                 info[request] = 'off'
                 gpio.output(19, gpio.LOW)
-                print(info[request])
+                print(request +': '+info[request])
             elif info[request] == 'off':
                 info[request] = 'on'
                 gpio.output(19, gpio.HIGH)
-                print(info[request])
+                print(request +': '+info[request])
         else:
             if info[request] == 'on':
                 info[request] = 'off'
+                print(request +': '+info[request])
             elif info[request] == 'off':
                 info[request] = 'on'
-                
+                print(request +': '+info[request])
                 
         #overwrites the json file with the new json data
         scripts.handlePut('data',info)

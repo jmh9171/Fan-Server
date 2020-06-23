@@ -59,8 +59,8 @@
                 case 'all':
                     document.getElementById("auto").textContent = myObj["auto"];
                     document.getElementById("power").textContent = myObj["power"];
-                    document.getElementById("date").textContent = myObj["modified"]
-                    document.getElementById("temp").textContent = myObj["currentTemp"]
+                    document.getElementById("outdoor").textContent = myObj["outdoor"]
+                    document.getElementById("indoor").textContent = myObj["indoor"]
                     break;
                 case 'power':
                     console.log(attribute + ": " + myObj[attribute]);
@@ -72,10 +72,10 @@
                     break;
                 case 'modified':
                     console.log(attribute + ": " + myObj[attribute]);
-                    document.getElementById("date").textContent = myObj[attribute];
+                    document.getElementById("outdoor").textContent = myObj[attribute];
                 case 'currentTemp':
                     console.log(attribute + ": " + myObj[attribute]);
-                    document.getElementById("temp").textContent = myObj[attribute];
+                    document.getElementById("indoor").textContent = myObj[attribute];
                 default:
                     break;
             }
@@ -109,14 +109,14 @@
                 Auto</button></td>
         </tr>
         <tr>
-            <th>Last Turned On: </th>
-            <td id="date" style="text-align: center;"></td>
+            <th>Outdoors: </th>
+            <td id="outdoor" style="text-align: center;"></td>
             <td></td>
         </tr>
         <tr>
 
-            <th>Temperature: </th>
-            <td id="temp" style="text-align: center;"></td>
+            <th>Indoors: </th>
+            <td id="indoor" style="text-align: center;"></td>
             <td></td>
         </tr>
     </table>
