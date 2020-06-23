@@ -23,12 +23,12 @@ class myThread (threading.Thread):
     apiCounter = 0
 
         
-        
+    
     def getTemp(self):
         try:
             self.insideTemp = format(self.dhtDevice.temperature * (9/5) + 32,"2.1f")
         except RuntimeError as error:
-        # Errors happen fairly often, DHT's are hard to read, just keep going
+        # Because errors happen on startup, kill the processes 
             if error.args[0] == "Timed out waiting for PulseIn message. Make sure libgpiod is installed.":
                 print("Timed Out Error")
                 self.reStart()
@@ -71,6 +71,18 @@ class myThread (threading.Thread):
         self.apiCounter = self.apiCounter + 1
         
         
+    def regulatePower(self):
+        info = scripts.getJsonData('data.json')
+        tempDiff = float(self.insideTemp) - float(self.outsideTemp)
+        if tempDiff >= 0 and info['power'] == 'off':
+            info['power'] = 'on'
+            print('Power on')
+            gpio.output(19, gpio.HIGH)
+        elif tempDiff < 0 and info['power'] == 'on':
+            info['power'] = 'off'
+            gpio.output(19, gpio.LOW)
+            print('Power off')
+        scripts.handlePut('data',info)
 
     def run(self):
         # monitor for the temp.
@@ -82,7 +94,8 @@ class myThread (threading.Thread):
             time.sleep(2)
             self.getTemp()
             if self.auto == 'on':
-                self.getAPITemp()                
+                self.getAPITemp()
+                self.regulatePower()
             info = scripts.getJsonData('data.json')
             info['indoor'] = str(self.insideTemp)
             info['outdoor'] = str(self.outsideTemp)
