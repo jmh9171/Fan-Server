@@ -23,17 +23,14 @@ class myThread (threading.Thread):
     apiCounter = 0
 
         
-    
+    #used to get the temp from the dht temp sensor
     def getTemp(self):
-        try:
+         try:
             self.insideTemp = format(self.dhtDevice.temperature * (9/5) + 32,"2.1f")
-        except RuntimeError as error:
-        # Because errors happen on startup, kill the processes 
-            if error.args[0] == "Timed out waiting for PulseIn message. Make sure libgpiod is installed.":
-                print("Timed Out Error")
-                self.reStart()
+         except RuntimeError as error:
+             print(error.args[0] + "Ignore error")
         
-
+    #for exiting the loop
     def callFlag(self):
         self.exitFlag = 1
 
@@ -42,14 +39,7 @@ class myThread (threading.Thread):
         self.threadID = threadID
         self.name = name
         
-    def reStart(self):
-        for line in os.popen("pgrep libgpiod_pulsei"):
-            fields = line.split()
-            pid = fields[0]
-            os.kill(int(pid), signal.SIGKILL)
-        print("--> Restarting")
-        os.execv(sys.executable, [sys.executable, 'Server.py'] + sys.argv)
-        
+    #for getting the outside temperature from an api. can only happen once every few minutes
     def getAPITemp(self):
         if (self.apiCounter % 180) == 0:
             conn = http.client.HTTPSConnection("community-open-weather-map.p.rapidapi.com")
@@ -70,7 +60,8 @@ class myThread (threading.Thread):
             self.apiCounter = 0
         self.apiCounter = self.apiCounter + 1
         
-        
+    
+    #when auto is on, regulates the power to the fans
     def regulatePower(self):
         info = scripts.getJsonData('data.json')
         tempDiff = float(self.insideTemp) - float(self.outsideTemp)

@@ -95,7 +95,7 @@
 
 <body onload="update('all')">
     <h2>Fan Control Panel</h2>
-    <table style="width:25%">
+    <table style="width:35%">
         <tr>
             <th>Fan Status:</th>
             <td id="power" style="text-align: center;"></td>
@@ -119,7 +119,18 @@
             <td id="indoor" style="text-align: center;"></td>
             <td></td>
         </tr>
+        <tr>
+            <th>
+                Basic Instructions:
+            </th>
+            <td>
+                Auto: automatically detects if temperature outside is cooler than inside and will power fans according to that.
+                To see current temp, please refresh page. Outside temperature only updated once every 10 minutes. 
+            </td>
+            <td></td>
+        </tr>
     </table>
+    
 </body>
 
 </html>

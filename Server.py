@@ -4,9 +4,11 @@ import scripts
 import TempControl
 import threading
 import RPi.GPIO as gpio
+import signal
+import sys
 
 PORT = 8000
-
+run = True
 threadLock = threading.Lock()
 
 gpio.setup(26, gpio.OUT)
@@ -69,15 +71,29 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
         self.send_headers(request)
         self.wfile.write(data.encode())
 
-        # overridden TCPServer class, this is where the server loop is
+def handler_stop_sig(signum, frame):
+    run = False
+
+
+# overridden TCPServer class, this is where the server loop is
 class MyTCPServer(socketserver.TCPServer):
+    Tthread = TempControl.myThread(2,'tempControl')
+     
+    def serve_forever(self):
+        super().serve_forever()
+        if run == false:
+            self.Tthread.callFlag()
+            sys.exit()
+        
 
     def server_activate(self):
         # call the super class
         super().server_activate()
         print('In server_activate')
-        Tthread = TempControl.myThread(2,'tempControl')
-        Tthread.start()
+       
+        self.Tthread.start()
+        signal.signal(signal.SIGINT, handler_stop_sig)
+        signal.signal(signal.SIGTERM, handler_stop_sig)
 
 httpd = MyTCPServer(("", PORT), MyTCPHandler)
 print("serving at port", PORT)
