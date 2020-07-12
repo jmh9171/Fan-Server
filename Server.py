@@ -1,14 +1,20 @@
-# import these to be able to create the server and set it to a port
 import http.server
 import socketserver
-import time
 import scripts
 import TempControl
 import threading
+import RPi.GPIO as gpio
+import signal
+import sys
 
-# the port number can be any port number above whatever the cutoff is
-PORT = 8001
+PORT = 8000
+run = True
 threadLock = threading.Lock()
+
+gpio.setup(26, gpio.OUT)
+gpio.output(26, gpio.LOW)
+gpio.setup(19, gpio.OUT)
+
 
 # inherited handler class where adjustments and if() will go
 class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
@@ -33,12 +39,25 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
 
     #handles put requests
     def do_PUT(self):
-        info = scripts.getJsonData('data.json')
         request = self.path.lower()[1::]
-        if info[request] == 'on':
-            info[request] = 'off'
-        elif info[request] == 'off':
-            info[request] = 'on'
+        info = scripts.getJsonData('data.json')
+        if request == 'power':
+            if info[request] == 'on':
+                info[request] = 'off'
+                gpio.output(19, gpio.LOW)
+                print(request +': '+info[request])
+            elif info[request] == 'off':
+                info[request] = 'on'
+                gpio.output(19, gpio.HIGH)
+                print(request +': '+info[request])
+        else:
+            if info[request] == 'on':
+                info[request] = 'off'
+                print(request +': '+info[request])
+            elif info[request] == 'off':
+                info[request] = 'on'
+                print(request +': '+info[request])
+                
         #overwrites the json file with the new json data
         scripts.handlePut('data',info)
         #reads the newly overwritten file to send it as a response
@@ -52,16 +71,30 @@ class MyTCPHandler(http.server.SimpleHTTPRequestHandler):
         self.send_headers(request)
         self.wfile.write(data.encode())
 
-        # overridden TCPServer class, this is where the server loop is
+def handler_stop_sig(signum, frame):
+    run = False
+
+
+# overridden TCPServer class, this is where the server loop is
 class MyTCPServer(socketserver.TCPServer):
+    Tthread = TempControl.myThread(2,'tempControl')
+     
+    def serve_forever(self):
+        super().serve_forever()
+        if run == false:
+            self.Tthread.callFlag()
+            sys.exit()
+        
 
     def server_activate(self):
         # call the super class
         super().server_activate()
         print('In server_activate')
-        Tthread = TempControl.myThread(2,'tempControl')
-        Tthread.start()
+       
+        self.Tthread.start()
+        signal.signal(signal.SIGINT, handler_stop_sig)
+        signal.signal(signal.SIGTERM, handler_stop_sig)
 
-with MyTCPServer(("", PORT), MyTCPHandler) as httpd:
-    print("serving at port", PORT)
-    httpd.serve_forever()
+httpd = MyTCPServer(("", PORT), MyTCPHandler)
+print("serving at port", PORT)
+httpd.serve_forever()
