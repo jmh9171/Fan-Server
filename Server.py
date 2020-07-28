@@ -7,7 +7,7 @@ import TempControl
 import threading
 
 # the port number can be any port number above whatever the cutoff is
-PORT = 8001
+PORT = 8000
 threadLock = threading.Lock()
 
 # inherited handler class where adjustments and if() will go
