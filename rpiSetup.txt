@@ -1,0 +1,37 @@
+Wiring layout for Pi from external devices.
+
+--Top of board where sd card slot is.
+
+        1|
+        |2
+        |3
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        ||
+        a|
+        b|
+        c|
+        d|
+
+--Botton of board where usb slots are
+
+1,2,3: to the temp sensor,
+    1 - red wire from sensor to white wire on board
+    2 - black wire from sensor to white wire on board
+    3 - yellow wire from sensor to brown wire on board
+
+a,b,c,d: to the power switch, (all part of one housing)
+    a - yellow wire (not connected to anything in the switch)
+    b - dark purple wire (+in on switch)
+    c - light purple wire (-in on switch)
+    d - black wire (ground on switch)
